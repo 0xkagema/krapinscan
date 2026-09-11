@@ -6,7 +6,7 @@ date details from Kenya Revenue Authority PIN certificate PDFs.
 ### Install
 
 ```bash
-uv add krapinscan
+ uv add git+https://github.com/0xkagema/krapinscan
 ```
 
 For local development:
