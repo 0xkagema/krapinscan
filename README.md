@@ -15,19 +15,16 @@ For local development:
 uv sync
 ```
 
-### Python API
+### Usage
 
 ```python
-from krapinscan import parse_statement
+from krapinscan import parse_certificate
 
-result_json = parse_statement("certificate.pdf")
+result_json = parse_certificate("certificate.pdf")
 ```
 
-`parse_statement` accepts a PDF path or PDF bytes and returns a JSON string with
+`parse_certificate` accepts a PDF path or PDF bytes and returns a JSON string with
 lowercase snake_case keys.
 
-### Command line
 
-```bash
-krapinscan certificate.pdf
 ```

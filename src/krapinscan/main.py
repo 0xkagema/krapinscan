@@ -12,9 +12,6 @@ class KraPinType(Enum):
     COMPANY = "Company"
 
 
-
-
-
 def _clean(value: object) -> str:
     """Normalize a cell without changing the value's meaning."""
     return re.sub(r"\s+", " ", str(value or "")).strip()
@@ -43,7 +40,6 @@ def _extract_header_details(text: str) -> dict[str, str | None]:
             if pin_number.group(1).startswith("A")
             else KraPinType.COMPANY.value
         )
-
 
     return {
         "kra_pin": pin_number.group(1) if pin_number else None,
@@ -108,7 +104,8 @@ def _extract_obligations(table: list[list[object]]) -> list[dict[str, str]]:
         obligations.append(dict(zip(headers, values)))
     return obligations
 
-def parse_statement(
+
+def parse_certificate(
     path_or_fp: str | bytes | bytearray,
 ) -> str:
     # handle bytes/bytearray vs file path
@@ -116,20 +113,22 @@ def parse_statement(
         file = io.BytesIO(path_or_fp)
     else:
         file = open(path_or_fp, "rb")
-    
+
     try:
         with pdfplumber.open(path_or_fp=file) as pdf:
 
             # a kra pin should only have one page, throw an error if there are more than one page
             if len(pdf.pages) > 1:
                 raise Exception("The PDF file has more than one page.")
-         
+
             first_page = pdf.pages[0]
-            
+
             tables = first_page.extract_tables()
 
             if len(tables) != 4:
-                raise Exception("The PDF file does not contain the expected four tables.")
+                raise Exception(
+                    "The PDF file does not contain the expected four tables."
+                )
 
             taxpayer = _extract_label_values(tables[1])
             address = _extract_label_values(tables[2])
@@ -138,27 +137,20 @@ def parse_statement(
                 **header_details,
                 "taxpayer_name": taxpayer.get("Taxpayer Name"),
                 "email_address": taxpayer.get("Email Address"),
-                "address": {
-                    _json_key(key): value for key, value in address.items()
-                },
+                "address": {_json_key(key): value for key, value in address.items()},
                 "obligations": [
-                    {
-                        _json_key(key): value
-                        for key, value in obligation.items()
-                    }
+                    {_json_key(key): value for key, value in obligation.items()}
                     for obligation in _extract_obligations(tables[3])
                 ],
             }
             return json.dumps(details, indent=2)
 
-    
     except PdfminerException as e:
-        
+
         raise Exception("Wrong password or corrupted PDF file.")
     except MalformedPDFException as e:
         raise Exception("The PDF file is malformed or corrupted.")
-        
-   
+
     finally:
         if not isinstance(path_or_fp, (bytes, bytearray)):
             file.close()
@@ -170,9 +162,8 @@ def main() -> None:
     )
     parser.add_argument("pdf_path", help="Path to the KRA PIN certificate PDF")
     args = parser.parse_args()
-    print(parse_statement(args.pdf_path))
+    print(parse_certificate(args.pdf_path))
 
 
 if __name__ == "__main__":
     main()
-

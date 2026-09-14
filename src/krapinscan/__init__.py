@@ -1,7 +1,8 @@
-from .main import KraPinType, main as _main, parse_statement
+from .main import KraPinType, main as _main, parse_certificate
 
 
 def main() -> None:
-	_main()
+    _main()
 
-__all__ = ["KraPinType", "main", "parse_statement"]
+
+__all__ = ["KraPinType", "main", "parse_certificate"]
